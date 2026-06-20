@@ -1,305 +1,308 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/status-alpha-FF4757?style=for-the-badge&logo=statuspal&logoColor=white" alt="Status Alpha">
+<img src="https://img.shields.io/badge/python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+<img src="https://img.shields.io/badge/react-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
+<img src="https://img.shields.io/badge/fastapi-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+<img src="https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+<img src="https://img.shields.io/badge/stars-⭐_beri_bintang-yellow?style=for-the-badge" alt="Stars">
+
+<br><br>
+
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/Python-Dark.svg" width="48" height="48">
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/TypeScript.svg" width="48" height="48">
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/React-Dark.svg" width="48" height="48">
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/TailwindCSS-Dark.svg" width="48" height="48">
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/PostgreSQL-Dark.svg" width="48" height="48">
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/Redis-Dark.svg" width="48" height="48">
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/Docker.svg" width="48" height="48">
+
+</div>
+
+<br>
+
+<h1 align="center">
+  ⚡ ATELIX ViralClip AI
+</h1>
+
 <p align="center">
-  <img src="https://img.shields.io/badge/status-alpha-red?style=for-the-badge" alt="Status: Alpha">
-  <img src="https://img.shields.io/badge/python-3.13+-blue?style=for-the-badge&logo=python" alt="Python 3.13+">
-  <img src="https://img.shields.io/badge/react-19-61DAFB?style=for-the-badge&logo=react" alt="React 19">
-  <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License: MIT">
+  <strong>Engine AI Otonom untuk Mengubah Video Panjang YouTube<br>
+  Menjadi Konten Vertikal Viral (TikTok • Reels • Shorts)</strong>
 </p>
 
-<h1 align="center">⚡ ATELIX ViralClip AI Pipeline</h1>
-<p align="center"><strong>Autonomous AI-Powered Video Processing Engine<br>Long-Form YouTube → Viral Short-Form Content (TikTok/Reels/Shorts)</strong></p>
+<br>
 
 ---
 
-## 🧠 Project Overview
+## 🤖 Tentang Proyek
 
-**ATELIX ViralClip AI Pipeline** is an end-to-end autonomous media processing engine powered by advanced artificial intelligence. It downloads long-duration YouTube videos, analyzes their narrative structure using Large Language Models (LLM) via the Model Context Protocol (MCP), identifies the most viral-worthy moments, and transforms them into premium-quality vertical short-form content (9:16 ratio) with professional-grade editing — all without human intervention.
+**ATELIX ViralClip AI** adalah mesin pemrosesan media otonom berbasis kecerdasan buatan. Sistem ini menelan video YouTube berdurasi panjang, menganalisis struktur naratifnya menggunakan AI Director melalui protokol MCP (*Model Context Protocol*), mengidentifikasi momen paling berpotensi viral, lalu mengubahnya menjadi konten vertikal pendek berkualitas premium — **tanpa campur tangan manusia sedikit pun.**
 
-### The Problem It Solves
+> 🎬 Dari video 2 jam → 5 klip TikTok viral dalam hitungan menit. AI yang memutuskan, AI yang mengedit, AI yang mempublikasi.
 
-| Pain Point | ATELIX Solution |
-|---|---|
-| Manual editing takes hours per clip | Fully autonomous pipeline — zero human intervention |
-| Random trimming misses viral moments | AI Director analyzes narrative, sentiment, and emotional peaks |
-| Subtitle creation is tedious | Word-level dynamic subtitles with keyword highlighting (Hormozi-style) |
-| 9:16 cropping cuts off speakers | MediaPipe face tracking → smart center-crop following the speaker |
-| Audio sounds amateur | Professional noise reduction, voice EQ, loudness normalization |
-| TikTok publishing is time-consuming | Playwright stealth automation — upload with captions, hashtags, trending audio |
+### 🎯 Masalah yang Diselesaikan
+
+<table>
+<tr>
+<td width="50%">
+
+❌ **Tanpa ATELIX**  
+• Editor manusia butuh 2-4 jam per klip  
+• Pemotongan acak — momen viral terlewat  
+• Subtitle manual membosankan & lambat  
+• Cropping 9:16 sering salah fokus  
+• Audio amatir — noise, volume nggak rata  
+• Upload TikTok manual satu per satu  
+
+</td>
+<td width="50%">
+
+✅ **Dengan ATELIX**  
+• Full otomatis — nol intervensi manusia  
+• AI Director analisis naratif & emosi  
+• Subtitle dinamis *Hormozi-style* per kata  
+• Face tracking speaker — crop selalu pas  
+• Audio enhancement profesional (EQ + noise removal)  
+• Publish otomatis — caption, hashtag, trending audio  
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🏗️ Architecture (End-to-End Pipeline)
+## 🏗️ Arsitektur Sistem
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    📥 INGESTION LAYER                            │
-│  YouTube URL  ──►  yt-dlp (best quality)  ──►  MP4 + Audio WAV │
-└────────────────────────────┬────────────────────────────────────┘
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    🎙️ TRANSCRIPTION LAYER                        │
-│  Audio WAV  ──►  faster-whisper (large-v3)  ──►  Word-level     │
-│                  timestamps + silence detection                  │
-└────────────────────────────┬────────────────────────────────────┘
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              🧠 AI DIRECTOR — CORE BRAIN (MCP)                   │
-│  Transcript + Timestamps  ──►  OpenCode (via MCP Protocol)      │
-│                                 ──►  Viral segments identified   │
-│                                 ──►  Hook text extraction        │
-│                                 ──►  Captions + Hashtags + Mood  │
-└────────────────────────────┬────────────────────────────────────┘
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    ✂️ EDITING ENGINE                             │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │ Smart Crop (9:16)  │ Face Tracking (MediaPipe)          │    │
-│  │ Dynamic Subtitles  │ Zoom/Retention Effects             │    │
-│  │ Audio Enhancement   │ BGM Mood Matching                  │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│  FFmpeg orchestration  ──►  1080×1920 rendered clips            │
-└────────────────────────────┬────────────────────────────────────┘
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    🚀 PUBLISHING LAYER                           │
-│  Playwright + Stealth  ──►  TikTok upload                       │
-│  Caption + Hashtags + Trending Audio  ──►  Live/Published       │
-└─────────────────────────────────────────────────────────────────┘
+                      📥 INGESTION
+   YouTube URL ──► yt-dlp (best quality) ──► Video MP4 + Audio WAV
+                            │
+                      🎙️ TRANSCRIPTION
+   Audio ──► faster‑whisper (large‑v3) ──► Transkrip per‑kata + deteksi jeda
+                            │
+                    🧠 AI DIRECTOR (MCP)
+   Transkrip ──► OpenCode via MCP ──► Deteksi momen viral
+                            │            ├─ Hook text (3 detik pertama)
+                            │            ├─ Caption + Hashtag + Mood
+                            │            └─ Skor viralitas per segmen
+                            │
+                    ✂️ EDITING ENGINE
+   ┌─────────────────────────────────────────────────┐
+   │ Smart Crop 9:16  │  Face Tracking (MediaPipe)    │
+   │ Subtitle Animasi │  Zoom Retention Effects       │
+   │ Audio Pro        │  BGM Mood Matching            │
+   └─────────────────────────────────────────────────┘
+     FFmpeg ──► Render final 1080×1920 @ 30fps
+                            │
+                      🚀 PUBLISHING
+   Playwright + Stealth ──► Upload TikTok ──► Live!
 ```
 
-### Data Flow Diagram
+### Alur Celery Pipeline
 
 ```
-User POST /api/v1/videos/  { youtube_url }
+POST /api/v1/videos/  { youtube_url }
          │
          ▼
-    Celery Chain:
-    ┌──────────┐    ┌──────────────┐    ┌──────────────┐    ┌───────────┐    ┌──────────┐
-    │ Download  │───►│  Transcribe  │───►│   Analyze    │───►│   Edit    │───►│  Render  │
-    │  Video   │    │  (Whisper)   │    │  (MCP/LLM)   │    │  (Crop+)  │    │ (FFmpeg) │
-    └──────────┘    └──────────────┘    └──────────────┘    └───────────┘    └──────────┘
-                                                                                  │
-                                                                                  ▼
-                                                                         ┌──────────────┐
-                                                                         │   Publish    │
-                                                                         │  (Playwright)│
-                                                                         └──────────────┘
+   ┌──────────┐   ┌──────────────┐   ┌──────────────┐   ┌───────────┐   ┌──────────┐
+   │ Download │──►│  Transcribe  │──►│   Analyze    │──►│   Edit    │──►│  Render  │
+   └──────────┘   └──────────────┘   └──────────────┘   └───────────┘   └──────────┘
+                                                                              │
+                                                                              ▼
+                                                                     ┌──────────────┐
+                                                                     │   Publish    │
+                                                                     └──────────────┘
 ```
 
 ---
 
-## 🧩 Tech Stack
+## 🧰 Tech Stack
 
-| Layer | Technology | Justification |
+| Layer | Teknologi | Alasan Pemilihan |
 |---|---|---|
-| **API Framework** | FastAPI (Python) | Async-native, auto OpenAPI docs, best AI/ML ecosystem |
-| **Task Queue** | Celery + Redis | Reliable async job processing for long-running video tasks |
-| **Database** | PostgreSQL (prod) / SQLite (dev) | Video metadata, transcription, clips, pipeline state |
-| **Transcription** | faster-whisper (CTranslate2) | 4× faster than OG Whisper, word-level timestamps, offline |
-| **LLM Integration** | OpenCode via MCP + OpenAI fallback | AI Director for viral analysis, sentiment, caption generation |
-| **Face Tracking** | MediaPipe Face Mesh | 468-point mesh, Kalman filter smoothing, robust detection |
-| **Video Processing** | FFmpeg + ffmpeg-python | Industry standard, GPU-accelerated encoding, all formats |
-| **Audio Processing** | librosa + pydub + noisereduce | Spectral analysis, noise reduction, loudness normalization |
-| **Browser Automation** | Playwright + playwright-stealth | Anti-detect TikTok publishing, human-like behavior |
-| **YouTube Download** | yt-dlp | Best quality extraction, format merging, metadata |
-| **Frontend** | React 19 + Vite + TailwindCSS v4 | Modern SPA, sub-400ms build, dark theme, responsive |
-| **Containerization** | Docker + Docker Compose | Reproducible environments, GPU passthrough support |
+| **API** | FastAPI (Python) | Async-native, auto docs, ekosistem AI/ML terbaik |
+| **Queue** | Celery + Redis | Job processing async yang andal untuk tugas berat |
+| **Database** | PostgreSQL (prod) / SQLite (dev) | Metadata video, transkrip, klip, status pipeline |
+| **Transkripsi** | faster-whisper (CTranslate2) | 4× lebih cepat dari Whisper asli, gratis selamanya |
+| **AI Director** | OpenCode via MCP + OpenAI fallback | Analisis viralitas, sentimen, caption, hashtag |
+| **Face Tracker** | MediaPipe Face Mesh | 468 titik landmark, smoothing Kalman filter |
+| **Video** | FFmpeg + ffmpeg-python | Standar industri, GPU encoding, semua format |
+| **Audio** | librosa + pydub + noisereduce | Analisis spektral, noise reduction, loudnorm |
+| **Browser** | Playwright + stealth | Anti-deteksi TikTok, perilaku human-like |
+| **Download** | yt-dlp | Ekstraksi kualitas terbaik, merge format, metadata |
+| **Frontend** | React 19 + Vite + TailwindCSS v4 | Build < 400ms, dark theme, responsive |
+| **Container** | Docker + Compose | Reproducible, GPU passthrough |
 
 ---
 
-## 🗂️ Project Structure
+## 📁 Struktur Proyek
+
+> 🗂️ **67 file • 6.480 baris kode** — modular, clean architecture, single responsibility
 
 ```
 ai-cliper/
 │
-├── backend/                          # Python FastAPI Backend
+├── backend/                         # ⚙️ Core Engine (Python FastAPI)
 │   ├── app/
-│   │   ├── api/                      # HTTP API Layer
-│   │   │   ├── deps.py               # FastAPI dependencies
+│   │   ├── api/                     # 🔌 REST API Layer
+│   │   │   ├── deps.py              #    Dependency injection (DB session, settings)
 │   │   │   └── routes/
-│   │   │       ├── videos.py         # POST/GET/DELETE /api/v1/videos/
-│   │   │       └── pipeline.py       # GET /api/v1/pipeline/ + POST publish
+│   │   │       ├── videos.py        #    CRUD video + trigger pipeline
+│   │   │       └── pipeline.py      #    Monitoring + publish endpoint
 │   │   │
-│   │   ├── core/                     # Application Core
-│   │   │   ├── config.py             # Typed settings (pydantic-settings)
-│   │   │   ├── database.py           # Async SQLAlchemy + SQLite/PostgreSQL
-│   │   │   └── celery_app.py         # Celery instance + configuration
+│   │   ├── core/                    # 🧬 Application Core
+│   │   │   ├── config.py            #    Konfigurasi typed (pydantic-settings)
+│   │   │   ├── database.py          #    Async engine (SQLite & PostgreSQL)
+│   │   │   └── celery_app.py        #    Celery instance + konfigurasi
 │   │   │
-│   │   ├── models/__init__.py        # ORM Models
-│   │   │   ├── Video                 # Source video metadata
-│   │   │   ├── Transcription         # Whisper output (word-level JSON)
-│   │   │   ├── Clip                  # Viral clip segments + metadata
-│   │   │   └── PipelineTask          # Task tracking + progress
+│   │   ├── models/                  # 🗃️ ORM Models (SQLAlchemy)
+│   │   │   └── __init__.py          #    Video, Transcription, Clip, PipelineTask
 │   │   │
-│   │   ├── schemas/__init__.py       # Pydantic request/response schemas
+│   │   ├── schemas/                 # 📋 Pydantic Schemas
+│   │   │   └── __init__.py          #    Request/response validation
 │   │   │
-│   │   ├── services/                 # Business Logic Layer
-│   │   │   ├── ingestion/
-│   │   │   │   ├── downloader.py     # yt-dlp YouTube downloader
-│   │   │   │   └── transcriber.py    # faster-whisper + silence detection
-│   │   │   │
-│   │   │   ├── analysis/
-│   │   │   │   └── viral_analyzer.py # LLM analysis + clip validation
-│   │   │   │
-│   │   │   ├── editing/
-│   │   │   │   ├── video_composer.py # Pipeline orchestration (edit + render)
-│   │   │   │   ├── face_tracker.py   # MediaPipe face mesh + Kalman smoothing
-│   │   │   │   ├── subtitle_renderer.py # ASS subtitle generation
-│   │   │   │   └── video_renderer.py # FFmpeg filter complex builder
-│   │   │   │
-│   │   │   ├── audio/
-│   │   │   │   └── enhancer.py       # Noise reduction, EQ, loudnorm, mood
-│   │   │   │
-│   │   │   └── publishing/
-│   │   │       └── tiktok_bot.py     # Playwright stealth TikTok uploader
+│   │   ├── services/                # 🧠 Business Logic (5 modul)
+│   │   │   ├── ingestion/           #    📥 Downloader + Transcriber
+│   │   │   ├── analysis/            #    🔬 AI Viral Analyzer
+│   │   │   ├── editing/             #    ✂️ Video Composer + Renderer
+│   │   │   ├── audio/               #    🎵 Audio Enhancer + Mood Detector
+│   │   │   └── publishing/          #    🚀 TikTok Bot (Playwright)
 │   │   │
-│   │   ├── mcp/
-│   │   │   └── client.py             # OpenCode MCP bridge + OpenAI fallback
+│   │   ├── mcp/                     # 🔗 MCP Integration
+│   │   │   └── client.py            #    OpenCode bridge + OpenAI fallback
 │   │   │
-│   │   ├── workers/
-│   │   │   └── tasks.py              # Celery task definitions (full pipeline chain)
-│   │   │
-│   │   └── main.py                   # FastAPI application entry point
+│   │   ├── workers/tasks.py         # ⚡ Celery Tasks (full pipeline chain)
+│   │   └── main.py                  # 🚀 FastAPI entry point
 │   │
-│   ├── alembic/                      # Database migrations
-│   ├── requirements.txt              # Python dependencies
-│   ├── Dockerfile                    # Backend container
-│   └── run_server.py                 # Dev server launcher
+│   ├── alembic/                     # Database migrations
+│   ├── requirements.txt             # Python dependencies
+│   ├── Dockerfile
+│   └── run_server.py
 │
-├── frontend/                         # React Dashboard
+├── frontend/                        # 🖥️ Dashboard (React + Vite)
 │   ├── src/
-│   │   ├── components/
-│   │   │   └── Layout.tsx            # App shell (header, nav, dark theme)
+│   │   ├── components/Layout.tsx    #    Shell aplikasi (header, nav, dark theme)
 │   │   ├── pages/
-│   │   │   ├── Dashboard.tsx         # YouTube URL input + video job list
-│   │   │   └── VideoDetail.tsx       # Clip details + publish actions
-│   │   ├── lib/
-│   │   │   ├── api.ts                # API client functions
-│   │   │   ├── client.ts             # Axios instance
-│   │   │   └── types.ts              # TypeScript interfaces
-│   │   ├── main.tsx                  # React entry (QueryClient + Router)
-│   │   └── App.tsx                   # Route definitions
-│   ├── vite.config.ts                # Vite + TailwindCSS plugin
-│   ├── tsconfig.json                 # TypeScript config
-│   └── Dockerfile                    # Frontend container
+│   │   │   ├── Dashboard.tsx        #    Input URL + daftar job video
+│   │   │   └── VideoDetail.tsx      #    Detail klip + aksi publish
+│   │   └── lib/                     #    API client, types, utilities
+│   ├── vite.config.ts
+│   ├── Dockerfile
+│   └── package.json
 │
-├── data/                             # Runtime data (gitignored)
-│   ├── models/                       # Whisper model files (~3GB)
-│   ├── temp/                         # Temporary download/processing
-│   └── output/                       # Rendered clips output
+├── data/                            # 💾 Runtime data (gitignored)
+│   ├── models/                      #    Model Whisper (~3GB)
+│   ├── temp/                        #    File sementara download
+│   └── output/                      #    Hasil render klip
 │
-├── scripts/
-│   ├── setup.ps1                     # One-command environment setup
-│   └── dev.ps1                       # Start backend + worker + frontend
+├── scripts/                         # 🔧 Development scripts
+│   ├── setup.ps1                    #    One-command install dependencies
+│   └── dev.ps1                      #    Start backend + worker + frontend
 │
-├── docker-compose.yml                # Full stack: PG + Redis + Backend + Worker + Frontend
-├── .env.example                      # Environment configuration template
-├── .gitignore                        # Git ignore rules
-├── test_core.py                      # Core engine test suite (10 tests)
-└── README.md                         # This file
+├── docker-compose.yml               # Full stack (PG + Redis + BE + Worker + FE)
+├── .env.example                     # Template konfigurasi environment
+├── test_core.py                     # Test suite (10 tes)
+└── README.md                        # 📖 Anda di sini
 ```
 
 ---
 
-## 🎯 Core Algorithms
+## 🧮 Algoritma Inti
 
-### 1. Viral Segment Detection
+### 1. Deteksi Momen Viral (AI Director)
 
-The AI Director (OpenCode via MCP) analyzes the full transcript with this prompt strategy:
-
-```
-Input: Full transcript + word-level timestamps + segment breakdown
-Analysis Criteria:
-  - Hook Potential (0-10):   Does it grab attention in 1-3 seconds?
-  - Emotional Impact (0-10): Shock, laughter, anger, inspiration, curiosity?
-  - Shareability (0-10):     Would someone send this to a friend?
-  - Controversy/Novelty:     Is it surprising or debate-sparking?
-  - Completeness (0-10):     Can it stand alone as a micro-story?
-
-Output: Structured JSON with ranked clips, captions, hashtags, mood
-Constraints: Max 5 clips, 15-90s each, non-overlapping, sorted by virality
-```
-
-**Fallback**: If MCP/OpenCode is unavailable, the system automatically falls back to OpenAI GPT-4o with JSON mode enabled.
-
-### 2. Smart 9:16 Cropping with Face Tracking
+AI Director menerima transkrip lengkap + timestamp per kata dan menganalisisnya dengan prompt terstruktur:
 
 ```
-1. Sample frames at 1-second intervals using OpenCV
-2. Detect faces using MediaPipe Face Mesh (468 landmarks)
-3. Store relative face center positions (cx, cy) per frame
-4. Apply Exponential Moving Average (α=0.3) for jitter reduction
-5. Calculate stability score (0-1) based on frame-to-frame movement
-6. Build FFmpeg crop filter centered on mean face position:
-   - If face detected:  crop=iw*0.5625:ih:centered_on_face
-   - If no face:        crop=iw*0.5625:ih:centered
-7. Scale to 1080×1920 with force_original_aspect_ratio
+Input:   Transkrip penuh + Word-level timeline + Segment breakdown
+
+Kriteria Analisis:
+├── Hook Potential      (0-10) — Apakah 1-3 detik pertama menarik perhatian?
+├── Emotional Impact    (0-10) — Kaget, lucu, marah, inspirasi, penasaran?
+├── Shareability        (0-10) — Apakah orang akan kirim ke teman?
+├── Controversy/Novelty (0-10) — Mengejutkan atau memicu debat?
+└── Completeness        (0-10) — Bisa berdiri sendiri sebagai cerita utuh?
+
+Output:   JSON terstruktur — klip teranking, caption, hashtag, mood
+Batasan:  Maksimal 5 klip, durasi 15-90 detik, tidak boleh tumpang tindih
 ```
 
-### 3. Dynamic Subtitle Rendering (Hormozi-Style)
+> 🔄 **Fallback otomatis**: Jika OpenCode/MCP tidak tersedia, sistem langsung beralih ke OpenAI GPT-4o.
+
+### 2. Smart Crop 9:16 + Face Tracking
 
 ```
-Input: Word-level timestamps from Whisper
-Process:
-  1. Filter words within clip time range
-  2. Group into display lines (max 5 words, split at >300ms gaps)
-  3. Apply mood-based color palette (8 mood presets)
-  4. Detect emotional keywords from dictionary (anger, excitement, etc.)
-  5. Tag keywords with highlight color + emoji insertion
-  6. Generate ASS (Advanced SubStation Alpha) subtitle file
-  7. FFmpeg burns subtitles with per-word timing and styling
+1.  Sampling frame setiap 1 detik dengan OpenCV
+2.  Deteksi wajah menggunakan MediaPipe Face Mesh (468 landmark)
+3.  Simpan posisi relatif wajah (cx, cy) per frame
+4.  Smoothing Exponential Moving Average (α=0.3) — kurangi jitter
+5.  Hitung skor stabilitas (0-1) dari pergerakan antar frame
+6.  Bangun FFmpeg crop filter berpusat pada posisi rata-rata wajah:
+    ├── Ada wajah → crop centered on face
+    └── Tidak ada → crop centered (fallback)
+7.  Scale ke 1080×1920
 ```
 
-**Mood Color Presets:**
+### 3. Subtitle Dinamis (Hormozi-Style)
 
-| Mood | Primary | Highlight |
+```
+Input:    Word-level timestamps dari Whisper
+Proses:
+  1. Filter kata dalam rentang waktu klip
+  2. Kelompokkan jadi baris (maks 5 kata, pisah di jeda >300ms)
+  3. Terapkan palet warna berdasarkan mood (8 preset)
+  4. Deteksi kata kunci emosional dari kamus (marah, semangat, sedih, kaget)
+  5. Tandai kata kunci dengan warna highlight + sisipkan emoji
+  6. Generate file subtitle ASS (Advanced SubStation Alpha)
+  7. FFmpeg burn subtitle dengan timing per kata + styling
+```
+
+**Palet Warna Mood:**
+
+| Mood | Warna Utama | Highlight |
 |---|---|---|
-| inspirational | `#FFD700` (gold) | `#FF6B35` (orange) |
-| humorous | `#00FF88` (green) | `#FF3366` (pink) |
-| controversial | `#FF4444` (red) | `#FF0000` |
-| educational | `#4FC3F7` (blue) | `#FFA726` (amber) |
-| emotional | `#FF80AB` (pink) | `#E040FB` (purple) |
-| shocking | `#FF1744` (red) | `#FF9100` (deep orange) |
+| ✨ Inspiratif | `#FFD700` emas | `#FF6B35` oranye |
+| 😂 Lucu | `#00FF88` hijau | `#FF3366` pink |
+| 🔥 Kontroversial | `#FF4444` merah | `#FF0000` merah tua |
+| 📚 Edukatif | `#4FC3F7` biru | `#FFA726` amber |
+| 😢 Emosional | `#FF80AB` pink | `#E040FB` ungu |
+| 😱 Mengejutkan | `#FF1744` merah | `#FF9100` oranye tua |
 
 ### 4. Audio Enhancement Pipeline
 
 ```
-1. Extract audio track (16kHz mono WAV) for Whisper
+1. Ekstrak track audio (16kHz mono WAV) — untuk Whisper
 2. Voice EQ:
-   - Highpass 80Hz (remove rumble)
-   - Lowpass 15kHz (remove hiss)
-   - Voice boost: +3dB at 2.5kHz, -2dB at 120Hz
-3. Noise reduction: FFmpeg anlmdn (non-local means)
-4. Dynamic compression: compand -80/-80|-30/-10|-20/-5|0/-3
-5. Loudness normalization: loudnorm I=-14 LUFS
-6. BGM mood detection: librosa spectral centroid + tempo analysis
+   ├── Highpass 80Hz     → buang suara rendah mengganggu
+   ├── Lowpass 15kHz     → buang desis
+   └── Voice boost       → +3dB @ 2.5kHz, -2dB @ 120Hz
+3. Noise reduction       → FFmpeg anlmdn (non-local means)
+4. Dynamic compression   → compand multi-threshold
+5. Loudness normalisasi  → loudnorm I=-14 LUFS (standar TikTok)
+6. Deteksi mood BGM      → librosa spectral centroid + tempo
 ```
 
 ---
 
 ## 📡 API Reference
 
-### Base URL: `http://localhost:8000`
-
-### Authentication
-Currently open (no auth). Add API keys via middleware for production.
+> Base URL: `http://localhost:8000` • Docs interaktif: `/docs` • ReDoc: `/redoc`
 
 ### Endpoints
 
-| Method | Path | Description |
+| Method | Endpoint | Keterangan |
 |---|---|---|
-| `POST` | `/api/v1/videos/` | Submit YouTube URL → triggers full pipeline |
-| `GET` | `/api/v1/videos/` | List all video jobs (supports `?status=` filter) |
-| `GET` | `/api/v1/videos/{id}` | Get video details + all clips |
-| `GET` | `/api/v1/videos/{id}/status` | Pipeline status + progress + clip count |
-| `DELETE` | `/api/v1/videos/{id}` | Delete video and all related data |
-| `GET` | `/api/v1/pipeline/clips/{video_id}` | List all clips for a video |
-| `GET` | `/api/v1/pipeline/tasks/{video_id}` | List pipeline task history |
-| `POST` | `/api/v1/pipeline/publish` | Publish a rendered clip to TikTok |
-| `GET` | `/health` | Health check |
-| `GET` | `/docs` | Interactive Swagger API documentation |
-| `GET` | `/redoc` | ReDoc API documentation |
+| `POST` | `/api/v1/videos/` | Submit URL YouTube → trigger full pipeline |
+| `GET` | `/api/v1/videos/` | Daftar semua job video (`?status=` untuk filter) |
+| `GET` | `/api/v1/videos/{id}` | Detail video + semua klip |
+| `GET` | `/api/v1/videos/{id}/status` | Status pipeline real-time + progres |
+| `DELETE` | `/api/v1/videos/{id}` | Hapus video beserta data terkait |
+| `GET` | `/api/v1/pipeline/clips/{id}` | Daftar klip hasil analisis |
+| `GET` | `/api/v1/pipeline/tasks/{id}` | Riwayat task per video |
+| `POST` | `/api/v1/pipeline/publish` | Publish klip ke TikTok |
+| `GET` | `/health` | Health check server |
 
-### Example: Submit a Video
+### Contoh: Submit Video Baru
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/videos/ \
@@ -307,13 +310,13 @@ curl -X POST http://localhost:8000/api/v1/videos/ \
   -d '{"youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}'
 ```
 
-### Example Response: Video Detail
+### Contoh Response: Detail Video
 
 ```json
 {
   "id": "c35014df-6ee5-4fb2-a9c9-1fbbd8c0af36",
   "youtube_url": "https://www.youtube.com/watch?v=...",
-  "title": "How AI Will Change Everything",
+  "title": "Bagaimana AI Akan Mengubah Segalanya",
   "duration_seconds": 1247.0,
   "status": "completed",
   "clips": [
@@ -324,9 +327,9 @@ curl -X POST http://localhost:8000/api/v1/videos/ \
       "end_time": 305.2,
       "duration": 59.7,
       "virality_score": 92,
-      "hook_text": "In the next 5 years, AI will...",
-      "caption": "This changed everything for me 🤯 #AI #Future",
-      "hashtags": ["ai", "future", "tech", "fyp", "viral"],
+      "hook_text": "Dalam 5 tahun ke depan, AI akan...",
+      "caption": "Ini mengubah segalanya buat saya 🤯 #AI #MasaDepan",
+      "hashtags": ["ai", "masadepan", "teknologi", "fyp", "viral"],
       "mood": "shocking",
       "output_path": "/data/output/abc123/clips/clip_001.mp4",
       "status": "completed"
@@ -337,58 +340,57 @@ curl -X POST http://localhost:8000/api/v1/videos/ \
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Panduan Instalasi
 
-### Prerequisites
+### Prasyarat
 
-| Software | Version | Required For |
+| Software | Versi | Dibutuhkan Untuk |
 |---|---|---|
-| Python | 3.11+ | Backend runtime |
-| Node.js | 22+ | Frontend build |
-| FFmpeg | 5.0+ | Video encoding/decoding |
-| PostgreSQL | 16+ | Production database |
+| Python | 3.11+ | Runtime backend |
+| Node.js | 22+ | Build frontend |
+| FFmpeg | 5.0+ | Encoding/decoding video |
+| PostgreSQL | 16+ | Database production |
 | Redis | 7+ | Celery task queue |
-| Git | 2.40+ | Version control |
-| CUDA (optional) | 12+ | GPU acceleration for Whisper |
+| CUDA | 12+ | GPU acceleration (opsional) |
 
-### Quick Start (Windows)
+### ⚡ Quick Start (Windows)
 
 ```powershell
 # 1. Clone repository
-git clone <repo-url> ai-cliper
-cd ai-cliper
+git clone https://github.com/gempurbudianarki/ATELIX-ViralClip-AI-Pipeline.git
+cd ATELIX-ViralClip-AI-Pipeline
 
-# 2. Run setup script (creates venv, installs deps)
+# 2. Jalankan script setup (buat venv + install dependencies)
 .\scripts\setup.ps1
 
-# 3. Configure environment
+# 3. Konfigurasi environment
 copy .env.example .env
-# Edit .env — add your OpenAI key, TikTok credentials, etc.
+# ✏️ Edit .env — isi OPENAI_API_KEY, kredensial TikTok, dll
 
-# 4. Install FFmpeg (if not already installed)
-# Download from: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
-# Extract and add bin/ folder to PATH
+# 4. Install FFmpeg (jika belum ada)
+# Download: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+# Extract dan tambahkan folder bin/ ke PATH
 
-# 5. Ensure PostgreSQL & Redis are running
+# 5. Pastikan PostgreSQL & Redis berjalan
 
-# 6. Start all services
+# 6. Jalankan semua layanan
 .\scripts\dev.ps1
 ```
 
-### Docker Setup (All-in-One)
+### 🐳 Docker (All-in-One)
 
 ```bash
-# Start full stack (PostgreSQL + Redis + Backend + Worker + Frontend)
+# Start full stack
 docker compose up -d
 
-# View logs
+# Cek logs
 docker compose logs -f backend
 
-# Stop everything
+# Stop semua
 docker compose down
 ```
 
-### Manual Setup (Linux/macOS)
+### 🐧 Manual (Linux/macOS)
 
 ```bash
 cd backend
@@ -396,126 +398,124 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Start backend
+# Terminal 1 — Backend
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-# Start worker (separate terminal)
+# Terminal 2 — Worker
 celery -A app.core.celery_app worker --loglevel=info
 
-# Start frontend (separate terminal)
+# Terminal 3 — Frontend
 cd ../frontend
-npm install
-npm run dev
+npm install && npm run dev
 ```
 
 ---
 
-## 📊 Project Status
+## 📊 Status Pengembangan
 
-### Completed ✅
+### ✅ Selesai (17 Modul)
 
-| Module | Status | Details |
+| Modul | Status | Detail Teknis |
 |---|---|---|
-| Project Structure | ✅ Done | 46 files, Clean Architecture pattern |
-| Config System | ✅ Done | pydantic-settings, .env, typed, dual DB support |
-| Database Models | ✅ Done | Video, Transcription, Clip, PipelineTask (SQLite + PG) |
-| API Routes | ✅ Done | Videos CRUD, Pipeline monitoring, Publish endpoint |
-| YouTube Downloader | ✅ Done | yt-dlp best quality, auto format merge |
-| Whisper Transcriber | ✅ Done | faster-whisper, word-level, VAD, silence detection |
-| MCP/LLM Analyzer | ✅ Done | OpenCode MCP bridge + OpenAI GPT-4o fallback |
-| Viral Segment Validator | ✅ Done | Overlap detection, duration clamping, score ranking |
-| Face Tracker | ✅ Done | MediaPipe 468-point mesh, Kalman smoothing |
-| Subtitle Renderer | ✅ Done | ASS format, 8 mood presets, keyword highlighting |
-| Audio Enhancer | ✅ Done | Noise reduction, voice EQ, loudnorm, mood detection |
-| FFmpeg Video Renderer | ✅ Done | Smart crop, zoom effects, subtitle burn, AAC audio |
-| TikTok Publisher | ✅ Done | Playwright stealth, human-like delays, caption + hashtags |
-| Celery Workers | ✅ Done | Full pipeline chain: download→transcribe→analyze→edit→render→publish |
-| Frontend Dashboard | ✅ Done | React 19, Vite, TailwindCSS v4, dark theme |
-| Docker Setup | ✅ Done | Full stack compose with GPU passthrough |
-| Test Suite | ✅ Done | 10 core tests passing |
-| README | ✅ Done | This document |
+| Struktur Proyek | ✅ | 67 file, Clean Architecture |
+| Konfigurasi | ✅ | pydantic-settings, dual DB (SQLite + PG) |
+| Database Models | ✅ | Video, Transcription, Clip, PipelineTask |
+| API Routes | ✅ | 9 endpoint REST + Swagger docs |
+| YouTube Downloader | ✅ | yt-dlp best quality, merge format |
+| Whisper Transcriber | ✅ | faster-whisper, word-level, VAD, silence detection |
+| MCP/LLM Analyzer | ✅ | OpenCode MCP bridge + OpenAI fallback |
+| Clip Validator | ✅ | Overlap detection, durasi clamp, score ranking |
+| Face Tracker | ✅ | MediaPipe 468-point, Kalman smoothing |
+| Subtitle Renderer | ✅ | ASS format, 8 mood presets, keyword highlight |
+| Audio Enhancer | ✅ | Noise reduction, voice EQ, loudnorm, mood |
+| FFmpeg Renderer | ✅ | Smart crop, zoom, subtitle burn, AAC |
+| TikTok Publisher | ✅ | Playwright stealth, human-like delays |
+| Celery Workers | ✅ | Full pipeline chain: 6 task berurutan |
+| Frontend Dashboard | ✅ | React 19, Vite, TailwindCSS v4 |
+| Docker Setup | ✅ | Compose full stack + GPU passthrough |
+| Test Suite | ✅ | 10/10 core tests passing |
 
-### In Progress 🔧
+### 🔧 Sedang Dikerjakan
 
-| Task | Priority | Blockers |
+| Tugas | Prioritas | Kendala |
 |---|---|---|
-| FFmpeg binary installation | High | Network download timeout |
-| Whisper model download | High | Requires FFmpeg for audio extraction |
-| End-to-end pipeline test | High | Requires FFmpeg + Whisper model |
-| PostgreSQL migration test | Medium | Requires running PostgreSQL instance |
-| TikTok live publishing test | Medium | Requires burner TikTok account |
-| GPU acceleration setup | Medium | Requires NVIDIA CUDA toolkit |
+| Install FFmpeg binary | HIGH | Timeout download (network) |
+| Download model Whisper | HIGH | Butuh FFmpeg untuk ekstrak audio |
+| Tes pipeline end-to-end | HIGH | Butuh FFmpeg + model Whisper |
+| Tes PostgreSQL migration | MEDIUM | Butuh instance PostgreSQL aktif |
+| Tes TikTok live publish | MEDIUM | Butuh akun TikTok burner |
 
-### Pending (Phase 2) 📋
+### 📋 Fase 2 (Mendatang)
 
-- YouTube OAuth for private/unlisted videos
-- Multi-platform publishing (YouTube Shorts, Instagram Reels)
-- Trending audio auto-matching (scrape TikTok trending sounds)
-- A/B testing framework for captions/thumbnails
-- Analytics dashboard (views, engagement tracking)
-- User authentication & multi-tenant support
-- Webhook notifications (Discord, Slack, Telegram)
-- Batch processing (playlist → multiple videos)
-- Custom branding overlay (watermark, logo, lower thirds)
+- OAuth YouTube untuk video private/unlisted
+- Multi-platform (YouTube Shorts, Instagram Reels)
+- Auto-matching trending audio TikTok
+- A/B testing caption & thumbnail
+- Dashboard analytics (views, engagement)
+- Autentikasi user & multi-tenant
+- Notifikasi webhook (Discord, Telegram)
+- Batch processing (playlist → banyak video)
+- Custom overlay branding (watermark, logo)
 
 ---
 
-## 🔐 Security Considerations
-
-- **API Keys**: Store in `.env` (never committed). Use secret management in production (AWS Secrets Manager, HashiCorp Vault)
-- **TikTok Credentials**: Never log or expose. Use environment variables only
-- **File Uploads**: Validate YouTube URLs server-side. No arbitrary file upload
-- **CORS**: Currently open for development. Lock down to specific origins in production
-- **Database**: Use PostgreSQL with SSL in production. Parameterized queries via SQLAlchemy (SQL injection safe)
-- **Dependencies**: Regularly audit with `pip audit` and `npm audit`
-- **GPU Access**: Docker GPU passthrough restricted to specific containers
-
----
-
-## 🧪 Running Tests
+## 🧪 Menjalankan Tes
 
 ```powershell
-# Core engine tests (10 tests)
+# Core engine test (10 tes)
 cd backend
 .\.venv\Scripts\python.exe ..\test_core.py
 
-# Python unit tests (requires pytest)
+# Unit test (butuh pytest)
 pytest app/tests/ -v
 
-# Frontend build check
+# Build check frontend
 cd frontend
 npm run build
 ```
 
 ---
 
-## 🤝 Contributing
+## 🔐 Keamanan
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Code Standards
-- Python: Strict typing, docstrings on all public functions
-- React: Functional components, hooks, TypeScript
-- Commits: Conventional Commits format (`feat:`, `fix:`, `docs:`, `refactor:`)
+- **API Keys**: Simpan di `.env` (tidak pernah di-commit). Gunakan secret manager di production
+- **Kredensial TikTok**: Variabel environment saja, tidak boleh di-log
+- **Validasi URL**: Cek server-side, tidak ada arbitrary file upload
+- **CORS**: Terbuka untuk development. Kunci ke origin spesifik di production
+- **Database**: PostgreSQL + SSL di production. Parameterized query via SQLAlchemy (anti SQL injection)
+- **Dependencies**: Audit rutin `pip audit` dan `npm audit`
 
 ---
 
-## 📝 License
+## 🤝 Berkontribusi
 
-MIT License — see [LICENSE](LICENSE) file for details.
+1. Fork repository ini
+2. Buat branch fitur (`git checkout -b feat/fitur-keren`)
+3. Commit perubahan (`git commit -m 'feat: tambah fitur keren'`)
+4. Push ke branch (`git push origin feat/fitur-keren`)
+5. Buka Pull Request
+
+### Standar Kode
+- **Python**: Strict typing, docstring di setiap fungsi publik
+- **React**: Functional components, hooks, TypeScript
+- **Commit**: Format Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`)
 
 ---
 
-## 👤 Author & Team
+## 👥 Tim
 
-**ATELIX ViralClip AI Pipeline** — Built with ❤️ by the ATELIX Core Team
+**ATELIX ViralClip AI** — Dibangun oleh ATELIX Core Team
 
 ---
 
-<p align="center">
-  <sub>Built with Python, React, FFmpeg, OpenAI, MediaPipe, and relentless ambition 🚀</sub>
-</p>
+<br>
+
+<div align="center">
+
+<sub>Dibangun dengan Python, React, FFmpeg, OpenAI, MediaPipe, dan ambisi tanpa batas 🚀</sub>
+
+<br>
+
+[⬆ Kembali ke atas](#-atelix-viralclip-ai)
+
+</div>
