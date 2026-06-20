@@ -1,0 +1,54 @@
+# ─── ATELIX ViralClip AI Pipeline ───
+# Core Framework
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+pydantic==2.11.3
+pydantic-settings==2.8.1
+
+# Database
+sqlalchemy[asyncio]==2.0.39
+asyncpg==0.30.0
+alembic==1.15.1
+
+# Task Queue
+celery[redis]==5.5.1
+redis==5.2.1
+
+# AI / ML
+faster-whisper==1.1.1
+openai==1.76.0
+opencv-python-headless==4.11.0.86
+mediapipe>=0.10.30
+numpy==2.2.4
+
+# Video Processing
+ffmpeg-python==0.2.0
+yt-dlp>=2026.6
+pillow>=11.0
+
+# Audio Processing
+pydub==0.25.1
+librosa==0.10.2
+soundfile==0.13.1
+noisereduce==3.0.3
+
+# Browser Automation
+playwright==1.52.0
+playwright-stealth==1.0.6
+
+# MCP Integration
+mcp==1.10.1
+
+# Utilities
+httpx==0.28.1
+python-multipart==0.0.20
+python-dotenv==1.1.0
+tenacity==9.1.2
+rich==13.9.4
+typer==0.15.2
+
+# Testing
+pytest==8.4.1
+pytest-asyncio==0.25.3
+pytest-cov==6.1.1
+httpx==0.28.1
