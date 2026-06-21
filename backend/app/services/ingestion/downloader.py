@@ -37,16 +37,21 @@ def download_youtube_video(video_id: str, youtube_url: str) -> dict:
 
     output_template = str(temp_dir / "%(title)s.%(ext)s")
 
+    ffmpeg_dir = str(Path(settings.ffmpeg_binary).parent)
+
     ydl_opts = {
         "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
         "outtmpl": output_template,
         "merge_output_format": "mp4",
+        "ffmpeg_location": ffmpeg_dir,
         "quiet": True,
         "no_warnings": True,
         "restrictfilenames": True,
         "writethumbnail": False,
         "writesubtitles": False,
         "writeautomaticsub": False,
+        "getcomments": True,
+        "max_comments": 150,
     }
 
     try:
@@ -55,6 +60,15 @@ def download_youtube_video(video_id: str, youtube_url: str) -> dict:
             video_title = info.get("title", "unknown")
             duration = info.get("duration", 0)
             resolution = info.get("resolution", "unknown")
+            comments = info.get("comments", []) or []
+            
+            cleaned_comments = []
+            for c in comments:
+                cleaned_comments.append({
+                    "text": c.get("text", "") or "",
+                    "like_count": c.get("like_count", 0) or 0,
+                    "timestamp": c.get("timestamp", 0) or 0,
+                })
 
             if duration > settings.max_video_duration_seconds:
                 raise ValueError(
@@ -83,6 +97,10 @@ def download_youtube_video(video_id: str, youtube_url: str) -> dict:
                     video.resolution = resolution or "unknown"
                     video.file_path = video_file
                     video.status = PipelineStatus.PENDING
+                    video.metadata_json = {
+                        **(video.metadata_json or {}),
+                        "comments": cleaned_comments,
+                    }
                     await session.commit()
 
         asyncio.get_event_loop().run_until_complete(_save_metadata())

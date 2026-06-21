@@ -10,6 +10,7 @@ import {
   Trash2,
   ExternalLink,
   Sparkles,
+  Globe,
 } from "lucide-react";
 import { fetchVideos, createVideo, deleteVideo } from "../lib/api";
 import type { Video } from "../lib/types";
@@ -103,6 +104,7 @@ function formatDate(dateStr: string): string {
 
 export function Dashboard() {
   const [url, setUrl] = useState("");
+  const [language, setLanguage] = useState("auto");
   const queryClient = useQueryClient();
 
   const { data: videos = [], isLoading } = useQuery({
@@ -112,10 +114,12 @@ export function Dashboard() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (youtubeUrl: string) => createVideo(youtubeUrl),
+    mutationFn: ({ youtubeUrl, lang }: { youtubeUrl: string; lang: string }) =>
+      createVideo(youtubeUrl, lang),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["videos"] });
       setUrl("");
+      setLanguage("auto");
     },
   });
 
@@ -143,7 +147,7 @@ export function Dashboard() {
       normalizedUrl = `https://www.youtube.com/watch?v=${id}`;
     }
 
-    createMutation.mutate(normalizedUrl);
+    createMutation.mutate({ youtubeUrl: normalizedUrl, lang: language });
   };
 
   return (
@@ -165,7 +169,7 @@ export function Dashboard() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-3">
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-0 md:flex md:gap-3">
         <div className="relative flex-1">
           <VideoIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
           <input
@@ -176,23 +180,41 @@ export function Dashboard() {
             className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-violet-500 transition-colors text-sm"
           />
         </div>
-        <button
-          type="submit"
-          disabled={!url.trim() || createMutation.isPending}
-          className="px-6 py-3 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-xl font-medium text-sm transition-all flex items-center gap-2 disabled:cursor-not-allowed"
-        >
-          {createMutation.isPending ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4" />
-              Generate Clips
-            </>
-          )}
-        </button>
+        <div className="flex gap-3 shrink-0">
+          <div className="relative">
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="pl-4 pr-10 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-zinc-300 focus:outline-none focus:border-violet-500 transition-colors text-sm cursor-pointer appearance-none min-w-[180px]"
+            >
+              <option value="auto">🌐 Auto Detect</option>
+              <option value="id">🇮🇩 Indonesian</option>
+              <option value="en">🇺🇸 English</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+              </svg>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={!url.trim() || createMutation.isPending}
+            className="px-6 py-3 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-xl font-medium text-sm transition-all flex items-center gap-2 disabled:cursor-not-allowed"
+          >
+            {createMutation.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Generate Clips
+              </>
+            )}
+          </button>
+        </div>
       </form>
 
       {createMutation.isError && (

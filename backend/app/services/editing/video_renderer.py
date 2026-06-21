@@ -1,10 +1,10 @@
 """
 ATELIX ViralClip AI Pipeline — FFmpeg Video Renderer
 Produces the final 9:16 vertical video with all effects applied.
+Uses 2-pass rendering to avoid filter_complex path escaping issues.
 """
 
 import subprocess
-import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -19,6 +19,7 @@ def render_single_clip(
     start_time: float,
     end_time: float,
     output_path: str,
+    source_path: str = "",
     face_data: Optional[dict] = None,
     subtitle_data: Optional[list] = None,
     mood: str = "neutral",
@@ -26,26 +27,18 @@ def render_single_clip(
     """
     Render a single clip with FFmpeg applying:
     1. Smart 9:16 crop centered on face (or frame center)
-    2. Dynamic subtitle burn-in from ASS file
+    2. Dynamic subtitle burn-in from ASS file (2nd pass)
     3. Subtle zoom retention effects
-    4. Audio pass-through (high quality)
+    4. Voice EQ, noise reduction and audio normalisation (audio enhancement)
+
+    Uses 2-pass approach when subtitles are enabled to avoid
+    FFmpeg filter_complex path escaping issues on Windows.
     """
 
-    from app.core.database import async_session_factory
-    from app.models import Video
-    from sqlalchemy import select
-    import asyncio
-
-    async def _get_source_path():
-        async with async_session_factory() as session:
-            result = await session.execute(select(Video).where(Video.id == video_id))
-            video = result.scalar_one_or_none()
-            return video.file_path if video else None
-
-    source_path = asyncio.get_event_loop().run_until_complete(_get_source_path())
-
     if not source_path:
-        raise FileNotFoundError(f"Source video not found for video_id={video_id}")
+        raise FileNotFoundError(f"No source_path provided for video_id={video_id}")
+    if not Path(source_path).exists():
+        raise FileNotFoundError(f"Source video not found: {source_path}")
 
     output_dir = Path(output_path).parent
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -69,48 +62,96 @@ def render_single_clip(
             subtitle_path,
             video_width=1080,
             video_height=1920,
+            mood=mood,
         )
 
     zoom_filter = _build_zoom_filter(duration)
 
-    filter_complex = crop_filter
+    # Cleanly combine filters so that crop maps to zoom, which then maps to [vout]
     if zoom_filter:
-        filter_complex = f"{crop_filter},{zoom_filter}"
+        crop_base = crop_filter.replace("[vout]", "")
+        filter_complex = f"{crop_base},{zoom_filter}[vout]"
+    else:
+        filter_complex = crop_filter
 
-    cmd = [
+    temp_output = None
+    if subtitle_path and Path(subtitle_path).exists():
+        temp_output = str(output_dir / f"{Path(output_path).stem}_temp.mp4")
+        render_target = temp_output
+    else:
+        render_target = str(output_path)
+
+    # Fetch professional voice quality audio enhancement filters
+    from app.services.audio.enhancer import get_audio_filter_string
+    audio_filter_str = get_audio_filter_string(noise_reduction=True, eq_preset="voice")
+
+    cmd_pass1 = [
         settings.ffmpeg_binary,
         "-y",
         "-ss", str(start_time),
         "-i", str(source_path),
         "-t", str(duration),
         "-filter_complex", filter_complex,
+        "-map", "[vout]",
+        "-map", "0:a",
+        "-af", audio_filter_str,
         "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "18",
+        "-preset", "ultrafast",
+        "-crf", "23",
         "-pix_fmt", "yuv420p",
         "-r", "30",
         "-c:a", "aac",
         "-b:a", "192k",
         "-ar", "44100",
         "-movflags", "+faststart",
+        render_target,
     ]
 
-    if subtitle_path and Path(subtitle_path).exists():
-        cmd.extend(["-vf", f"ass={subtitle_path}"])
-
-    cmd.append(str(output_path))
-
     result = subprocess.run(
-        cmd,
+        cmd_pass1,
         capture_output=True,
         text=True,
         timeout=600,
+        creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0,
     )
 
     if result.returncode != 0:
         raise RuntimeError(
-            f"FFmpeg render failed for clip {clip_id}: {result.stderr[:500]}"
+            f"FFmpeg render failed for clip {clip_id}: {result.stderr[:2000]}"
         )
+
+    if temp_output and subtitle_path and Path(subtitle_path).exists():
+        # Escape Windows path characters for subtitles filter parsing: replace "\" with "/" and escape ":"
+        escaped_subtitle_path = subtitle_path.replace("\\", "/").replace(":", "\\:")
+        cmd_pass2 = [
+            settings.ffmpeg_binary,
+            "-y",
+            "-i", temp_output,
+            "-vf", f"subtitles='{escaped_subtitle_path}'",
+            "-c:v", "libx264",
+            "-preset", "medium",
+            "-crf", "18",
+            "-pix_fmt", "yuv420p",
+            "-r", "30",
+            "-c:a", "copy",
+            "-movflags", "+faststart",
+            str(output_path),
+        ]
+
+        result2 = subprocess.run(
+            cmd_pass2,
+            capture_output=True,
+            text=True,
+            timeout=600,
+            creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0,
+        )
+
+        Path(temp_output).unlink(missing_ok=True)
+
+        if result2.returncode != 0:
+            raise RuntimeError(
+                f"FFmpeg subtitle burn failed for clip {clip_id}: {result2.stderr[:2000]}"
+            )
 
     output_size = Path(output_path).stat().st_size if Path(output_path).exists() else 0
 
@@ -131,12 +172,6 @@ def _build_crop_filter(
     target_w: int = 1080,
     target_h: int = 1920,
 ) -> str:
-    """
-    Build FFmpeg crop + scale filter for smart 9:16 conversion.
-
-    If face tracking data is available, center on the face position.
-    Otherwise, center-crop the frame.
-    """
     aspect_ratio = target_w / target_h
 
     if face_data and face_data.get("face_detected"):
@@ -159,10 +194,6 @@ def _build_crop_filter(
 
 
 def _build_zoom_filter(duration: float, intensity: float = 0.03) -> str:
-    """
-    Build subtle zoom-in/zoom-out filter for retention.
-    Creates a very slow Ken Burns-style zoom.
-    """
     return (
         f"zoompan=z='min(zoom+0.0005,1.05)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920"
     )

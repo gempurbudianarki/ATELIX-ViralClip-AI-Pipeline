@@ -1,6 +1,7 @@
 """
 ATELIX ViralClip AI Pipeline — Face Tracker
-Uses MediaPipe Face Mesh to detect and track the speaker's face for smart 9:16 cropping.
+Uses MediaPipe Face Detector (new task API) with OpenCV Haar Cascade fallback.
+Tracks speaker face for smart 9:16 cropping.
 """
 
 from typing import Optional
@@ -14,17 +15,12 @@ def analyze_clip_face_positions(
 ) -> dict:
     """
     Analyze face positions throughout the clip segment.
-    Samples frames at regular intervals, detects faces, and returns
-    smoothed tracking data for the smart crop algorithm.
+    Samples frames at regular intervals and returns smoothed tracking data.
 
-    Uses MediaPipe Face Mesh for robust face detection.
+    Priority: MediaPipe task API → OpenCV Haar Cascade → center fallback
     """
     import cv2
-    import mediapipe as mp
     import numpy as np
-
-    mp_face_detection = mp.solutions.face_detection
-    mp_drawing = mp.solutions.drawing_utils
 
     cap = cv2.VideoCapture(source_path)
     if not cap.isOpened():
@@ -46,36 +42,27 @@ def analyze_clip_face_positions(
 
     face_positions = []
 
-    with mp_face_detection.FaceDetection(
-        model_selection=1, min_detection_confidence=0.5
-    ) as detector:
-        for frame_num in range(start_frame, end_frame + 1, sample_every_n_frames):
-            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
-            ret, frame = cap.read()
+    detector = _create_face_detector()
 
-            if not ret:
-                continue
+    for frame_num in range(start_frame, end_frame + 1, sample_every_n_frames):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
+        ret, frame = cap.read()
 
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = detector.process(rgb_frame)
+        if not ret:
+            continue
 
-            timestamp = frame_num / fps - start_time
+        timestamp = frame_num / fps - start_time
+        detection = _detect_face(frame, detector)
 
-            if results.detections:
-                detection = results.detections[0]
-
-                bbox = detection.location_data.relative_bounding_box
-                cx = bbox.xmin + bbox.width / 2
-                cy = bbox.ymin + bbox.height / 2
-
-                face_positions.append({
-                    "timestamp": round(timestamp, 2),
-                    "center_x": round(cx, 4),
-                    "center_y": round(cy, 4),
-                    "width": round(bbox.width, 4),
-                    "height": round(bbox.height, 4),
-                    "confidence": round(detection.score[0], 4),
-                })
+        if detection:
+            face_positions.append({
+                "timestamp": round(timestamp, 2),
+                "center_x": round(detection["center_x"], 4),
+                "center_y": round(detection["center_y"], 4),
+                "width": round(detection["width"], 4),
+                "height": round(detection["height"], 4),
+                "confidence": round(detection["confidence"], 4),
+            })
 
     cap.release()
 
@@ -91,7 +78,7 @@ def analyze_clip_face_positions(
     stability = _calculate_stability(smoothed)
 
     return {
-        "method": "mediapipe_face_mesh",
+        "method": detection.get("method", "unknown") if 'detection' in locals() and detection else "unknown",
         "face_detected": True,
         "samples": smoothed,
         "samples_count": len(smoothed),
@@ -105,19 +92,132 @@ def analyze_clip_face_positions(
     }
 
 
+def _create_face_detector() -> dict:
+    """
+    Create face detector instance.
+    Returns a dict with 'type' and 'instance' keys, or None.
+    """
+    try:
+        import mediapipe as mp
+        from mediapipe.tasks import python as mp_python
+        from mediapipe.tasks.python import vision
+
+        base_options = mp_python.BaseOptions(
+            model_asset_buffer=_get_mediapipe_model_buffer()
+        )
+        options = vision.FaceDetectorOptions(
+            base_options=base_options,
+            running_mode=vision.RunningMode.IMAGE,
+            min_detection_confidence=0.5,
+        )
+        detector = vision.FaceDetector.create_from_options(options)
+        return {"type": "mediapipe_task", "instance": detector}
+    except Exception as e_mp:
+        pass
+
+    try:
+        import cv2
+        cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        cascade = cv2.CascadeClassifier(cascade_path)
+        if not cascade.empty():
+            return {"type": "opencv_haar", "instance": cascade}
+    except Exception:
+        pass
+
+    return None
+
+
+def _get_mediapipe_model_buffer() -> bytes:
+    """
+    Get the MediaPipe face detector model.
+    Downloads if not cached.
+    """
+    import os
+
+    cache_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "models")
+    cache_dir = os.path.abspath(cache_dir)
+    model_path = os.path.join(cache_dir, "blaze_face_short_range.tflite")
+
+    if os.path.exists(model_path):
+        with open(model_path, "rb") as f:
+            return f.read()
+
+    try:
+        import urllib.request
+        os.makedirs(cache_dir, exist_ok=True)
+        url = "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite"
+        urllib.request.urlretrieve(url, model_path)
+        with open(model_path, "rb") as f:
+            return f.read()
+    except Exception:
+        pass
+
+    return b""
+
+
+def _detect_face(frame, detector: Optional[dict]) -> Optional[dict]:
+    """
+    Detect the primary face in a frame.
+    Returns dict with center_x, center_y, width, height, confidence, method.
+    """
+    if detector is None:
+        return None
+
+    h, w = frame.shape[:2]
+
+    if detector["type"] == "mediapipe_task":
+        try:
+            import mediapipe as mp
+            mp_image = mp.Image(
+                image_format=mp.ImageFormat.SRGB,
+                data=frame,
+            )
+            result = detector["instance"].detect(mp_image)
+
+            if result.detections:
+                det = result.detections[0]
+                bbox = det.bounding_box
+                return {
+                    "center_x": (bbox.origin_x + bbox.width / 2) / w,
+                    "center_y": (bbox.origin_y + bbox.height / 2) / h,
+                    "width": bbox.width / w,
+                    "height": bbox.height / h,
+                    "confidence": det.categories[0].score if det.categories else 1.0,
+                    "method": "mediapipe",
+                }
+        except Exception:
+            pass
+
+    if detector["type"] == "opencv_haar":
+        import cv2
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = detector["instance"].detectMultiScale(
+            gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
+        )
+
+        if len(faces) > 0:
+            x, y, fw, fh = faces[0]
+            return {
+                "center_x": (x + fw / 2) / w,
+                "center_y": (y + fh / 2) / h,
+                "width": fw / w,
+                "height": fh / h,
+                "confidence": 0.8,
+                "method": "opencv_haar",
+            }
+
+    return None
+
+
 def _kalman_smooth_positions(
     positions: list[dict],
-    process_noise: float = 1e-3,
-    measurement_noise: float = 1e-1,
+    alpha: float = 0.3,
 ) -> list[dict]:
     """
-    Apply simple Kalman-like smoothing to reduce jitter in face tracking.
-    Uses exponential moving average as a lightweight approximation.
+    Apply exponential moving average smoothing to reduce jitter.
     """
     if len(positions) <= 2:
         return positions
-
-    alpha = 0.3
 
     smoothed = [positions[0].copy()]
 
@@ -139,16 +239,22 @@ def _kalman_smooth_positions(
 
 def _calculate_stability(positions: list[dict]) -> float:
     """
-    Calculate how stable the face position is throughout the clip.
-    Returns 0 (very unstable) to 1 (perfectly stable).
+    Calculate how stable the face position is (0 = jittery, 1 = stable).
     """
     if len(positions) < 2:
         return 1.0
 
-    import math
+    dx = [
+        abs(positions[i]["center_x"] - positions[i - 1]["center_x"])
+        for i in range(1, len(positions))
+    ]
+    dy = [
+        abs(positions[i]["center_y"] - positions[i - 1]["center_y"])
+        for i in range(1, len(positions))
+    ]
 
-    dx = [abs(positions[i]["center_x"] - positions[i - 1]["center_x"]) for i in range(1, len(positions))]
-    dy = [abs(positions[i]["center_y"] - positions[i - 1]["center_y"]) for i in range(1, len(positions))]
+    if not dx or not dy:
+        return 1.0
 
     avg_movement = sum(dx) / len(dx) + sum(dy) / len(dy)
     stability = max(0.0, min(1.0, 1.0 - avg_movement * 5))

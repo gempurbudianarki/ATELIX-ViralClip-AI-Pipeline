@@ -24,9 +24,10 @@ export async function fetchClips(videoId: string): Promise<Clip[]> {
   return res.data;
 }
 
-export async function createVideo(youtubeUrl: string): Promise<Video> {
+export async function createVideo(youtubeUrl: string, language?: string): Promise<Video> {
   const res = await apiClient.post<Video>("/api/v1/videos/", {
     youtube_url: youtubeUrl,
+    language: language === "auto" ? null : language,
   });
   return res.data;
 }

@@ -11,6 +11,38 @@ from app.core.config import get_settings
 settings = get_settings()
 
 
+def get_audio_filter_string(
+    noise_reduction: bool = True,
+    eq_preset: str = "voice",
+) -> str:
+    """
+    Generate FFmpeg audio filter string for professional voice quality.
+    """
+    filters = []
+    filters.append("highpass=f=80")
+    filters.append("lowpass=f=15000")
+
+    if noise_reduction:
+        filters.append("anlmdn=s=0.0001:p=0.01")
+
+    if eq_preset == "voice":
+        filters.append("equalizer=f=2500:t=q:w=0.5:g=3")
+        filters.append("equalizer=f=120:t=q:w=1:g=-2")
+    elif eq_preset == "podcast":
+        filters.append("equalizer=f=120:t=q:w=0.5:g=4")
+        filters.append("equalizer=f=3000:t=q:w=1:g=2")
+    elif eq_preset == "cinematic":
+        filters.append("equalizer=f=80:t=q:w=1:g=3")
+        filters.append("equalizer=f=12000:t=q:w=1:g=2")
+    elif eq_preset == "clean":
+        filters.append("equalizer=f=400:t=q:w=1:g=-4")
+
+    filters.append("loudnorm=I=-14:LRA=1:TP=-1")
+    filters.append("compand=attacks=0.01:decays=0.2:points=-80/-80|-30/-10|-20/-5|0/-3")
+
+    return ",".join(filters)
+
+
 def enhance_audio(
     input_path: str,
     output_path: Optional[str] = None,
@@ -65,29 +97,7 @@ def apply_ffmpeg_audio_filters(
     """
     import subprocess
 
-    filters = []
-    filters.append("highpass=f=80")
-    filters.append("lowpass=f=15000")
-
-    if noise_reduction:
-        filters.append("anlmdn=s=0.0001:p=0.01")
-
-    if eq_preset == "voice":
-        filters.append("equalizer=f=2500:t=q:w=0.5:g=3")
-        filters.append("equalizer=f=120:t=q:w=1:g=-2")
-    elif eq_preset == "podcast":
-        filters.append("equalizer=f=120:t=q:w=0.5:g=4")
-        filters.append("equalizer=f=3000:t=q:w=1:g=2")
-    elif eq_preset == "cinematic":
-        filters.append("equalizer=f=80:t=q:w=1:g=3")
-        filters.append("equalizer=f=12000:t=q:w=1:g=2")
-    elif eq_preset == "clean":
-        filters.append("equalizer=f=400:t=q:w=1:g=-4")
-
-    filters.append("loudnorm=I=-14:LRA=1:TP=-1")
-    filters.append("compand=attacks=0.01:decays=0.2:points=-80/-80|-30/-10|-20/-5|0/-3")
-
-    filter_str = ",".join(filters)
+    filter_str = get_audio_filter_string(noise_reduction, eq_preset)
 
     cmd = [
         settings.ffmpeg_binary,

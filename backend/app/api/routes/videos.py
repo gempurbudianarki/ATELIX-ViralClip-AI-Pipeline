@@ -27,9 +27,14 @@ async def create_video(
     payload: VideoCreateRequest,
     db: AsyncSession = Depends(get_db),
 ):
+    metadata = {}
+    if payload.language:
+        metadata["language"] = payload.language
+
     video = Video(
         youtube_url=payload.youtube_url,
         status=PipelineStatus.PENDING,
+        metadata_json=metadata,
     )
     db.add(video)
     await db.flush()

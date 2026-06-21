@@ -2,6 +2,9 @@
 ATELIX ViralClip AI Pipeline — FastAPI Application Entry Point
 """
 
+import nest_asyncio
+nest_asyncio.apply()
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI

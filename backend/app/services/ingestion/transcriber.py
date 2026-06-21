@@ -36,6 +36,7 @@ def transcribe_with_whisper(video_id: str) -> dict:
     """
     Run faster-whisper on the audio track of the downloaded video.
     Produces word-level timestamps for precise subtitle rendering.
+    Supports language override via video metadata.
     """
     from app.core.database import async_session_factory
     from app.models import Video, Transcription, PipelineStatus
@@ -65,12 +66,23 @@ def transcribe_with_whisper(video_id: str) -> dict:
 
         model = _get_model()
 
+        # Retrieve manual language override from metadata if available
+        meta = video.metadata_json or {}
+        lang_override = meta.get("language")
+        if lang_override == "auto" or not lang_override:
+            lang_param = None
+        else:
+            lang_param = lang_override
+
+        print(f"Starting Whisper transcription for video {video_id} (language parameter: {lang_param})")
+
         segments_result, info = model.transcribe(
             video.file_path,
             beam_size=5,
             word_timestamps=True,
             vad_filter=True,
             vad_parameters={"min_silence_duration_ms": 300},
+            language=lang_param,
         )
 
         segments = []

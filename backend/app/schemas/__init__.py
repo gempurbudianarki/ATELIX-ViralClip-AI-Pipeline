@@ -17,6 +17,11 @@ class VideoCreateRequest(BaseModel):
         description="URL video YouTube yang akan diproses",
         examples=["https://www.youtube.com/watch?v=dQw4w9WgXcQ"],
     )
+    language: Optional[str] = Field(
+        None,
+        description="Kode bahasa (contoh: 'id', 'en', 'auto') atau null untuk auto-detect",
+        examples=["id", "en", "auto"],
+    )
 
 
 class VideoResponse(BaseModel):

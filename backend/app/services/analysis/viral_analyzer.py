@@ -35,14 +35,20 @@ def analyze_viral_segments(video_id: str) -> dict:
     asyncio.get_event_loop().run_until_complete(_update_status())
 
     try:
-        async def _load_transcript():
+        async def _load_video_and_transcription():
             async with async_session_factory() as session:
-                result = await session.execute(
+                v_res = await session.execute(
+                    select(Video).where(Video.id == video_id)
+                )
+                video_record = v_res.scalar_one_or_none()
+
+                t_res = await session.execute(
                     select(Transcription).where(Transcription.video_id == video_id)
                 )
-                return result.scalar_one_or_none()
+                trans_record = t_res.scalar_one_or_none()
+                return video_record, trans_record
 
-        transcription = asyncio.get_event_loop().run_until_complete(_load_transcript())
+        video, transcription = asyncio.get_event_loop().run_until_complete(_load_video_and_transcription())
 
         if not transcription:
             raise ValueError("Transcription not found. Run transcription first.")
@@ -53,6 +59,9 @@ def analyze_viral_segments(video_id: str) -> dict:
             "words": transcription.words_json or [],
             "silence_segments": transcription.silence_segments_json or [],
             "language": transcription.language,
+            "duration": (transcription.words_json[-1]["end"] - transcription.words_json[0]["start"])
+            if transcription.words_json else 0,
+            "comments": (video.metadata_json or {}).get("comments", []) if video else [],
         }
 
         analysis_result = call_opencode_mcp(transcript_data)
@@ -85,7 +94,10 @@ def analyze_viral_segments(video_id: str) -> dict:
                 result = await session.execute(select(Video).where(Video.id == video_id))
                 video = result.scalar_one_or_none()
                 if video:
-                    video.metadata_json = analysis_result.get("video_analysis", {})
+                    video.metadata_json = {
+                        **(video.metadata_json or {}),
+                        "video_analysis": analysis_result.get("video_analysis", {}),
+                    }
                     video.status = PipelineStatus.PENDING
                 await session.commit()
 
@@ -112,11 +124,33 @@ def analyze_viral_segments(video_id: str) -> dict:
         raise
 
 
+def _align_timestamps_to_words(start: float, end: float, words: list[dict]) -> tuple[float, float]:
+    """Snap start and end times to Whisper word-level boundaries if a matching word is within 4.0s."""
+    if not words:
+        return start, end
+
+    # Find word closest to start time
+    start_word = min(words, key=lambda w: abs(w["start"] - start))
+    # Find word closest to end time
+    end_word = min(words, key=lambda w: abs(w["end"] - end))
+
+    # Only snap if within 4.0 seconds of keyframe target
+    aligned_start = start_word["start"] if abs(start_word["start"] - start) <= 4.0 else start
+    aligned_end = end_word["end"] if abs(end_word["end"] - end) <= 4.0 else end
+
+    # Ensure valid duration order
+    if aligned_end <= aligned_start:
+        aligned_end = aligned_start + max(end - start, 1.0)
+
+    return aligned_start, aligned_end
+
+
 def _validate_and_normalize_clips(
     analysis: dict, transcript_data: dict
 ) -> list[dict]:
     """
     Validate LLM output:
+    - Snap timestamps exactly to word-level boundaries to prevent word truncation
     - Ensure timestamps are within video duration
     - Remove overlapping clips (keep higher virality score)
     - Enforce max 5 clips, duration 15-90s
@@ -127,21 +161,29 @@ def _validate_and_normalize_clips(
         raise ValueError("No clips found in analysis result")
 
     max_duration = settings.max_clip_duration_seconds
-    min_duration = 15
+    total_duration = transcript_data.get("duration", 0)
+    words = transcript_data.get("words", [])
+
+    if not total_duration and words:
+        total_duration = words[-1]["end"] - words[0]["start"] if len(words) > 1 else 0
+    min_duration = 3 if total_duration < 30 else 15
 
     validated = []
     seen_intervals = []
 
     for clip in clips:
-        start = float(clip.get("start_time", 0))
-        end = float(clip.get("end_time", 0))
+        raw_start = float(clip.get("start_time", 0))
+        raw_end = float(clip.get("end_time", 0))
+
+        if raw_start < 0:
+            raw_start = 0.0
+
+        # Align to word boundaries
+        start, end = _align_timestamps_to_words(raw_start, raw_end, words)
         duration = end - start
 
         if duration < min_duration or duration > max_duration:
             continue
-
-        if start < 0:
-            start = 0.0
 
         overlap = any(
             max(start, s["start"]) < min(end, s["end"])

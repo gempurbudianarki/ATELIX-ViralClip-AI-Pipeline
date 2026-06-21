@@ -95,7 +95,11 @@ def edit_viral_clips(video_id: str) -> dict:
                     clip.end_time,
                 )
                 clip_data["face_tracking"] = face_data
+            except Exception as face_error:
+                print(f"Warning: face tracking failed for clip {clip.id}: {face_error}")
+                clip_data["face_tracking"] = {"method": "error_fallback", "face_detected": False}
 
+            try:
                 subtitle_data = prepare_subtitle_data(
                     transcription.words_json or [],
                     clip.start_time,
@@ -104,12 +108,12 @@ def edit_viral_clips(video_id: str) -> dict:
                 )
                 clip_data["subtitles"] = subtitle_data
                 clip_data["subtitle_count"] = len(subtitle_data)
+            except Exception as sub_error:
+                print(f"Warning: subtitle generation failed for clip {clip.id}: {sub_error}")
+                clip_data["subtitles"] = []
+                clip_data["subtitle_count"] = 0
 
-                prepared_clips.append(clip_data)
-
-            except Exception as clip_error:
-                print(f"Warning: failed to prepare clip {clip.id}: {clip_error}")
-                prepared_clips.append(clip_data)
+            prepared_clips.append(clip_data)
 
         async def _save_prepared_data():
             async with async_session_factory() as session:
@@ -123,6 +127,7 @@ def edit_viral_clips(video_id: str) -> dict:
                             **(clip_db.metadata_json or {}),
                             "face_tracking": clip_data.get("face_tracking"),
                             "subtitle_count": clip_data.get("subtitle_count", 0),
+                            "subtitles": clip_data.get("subtitles", []),
                         }
                         clip_db.output_path = clip_data["output_path"]
                 await session.commit()
@@ -193,6 +198,16 @@ def render_viral_clips(video_id: str) -> dict:
 
         clips = asyncio.get_event_loop().run_until_complete(_load_clips())
 
+        async def _get_video():
+            async with async_session_factory() as session:
+                result = await session.execute(select(Video).where(Video.id == video_id))
+                v = result.scalar_one_or_none()
+                return v.file_path if v else None
+
+        source_path = asyncio.get_event_loop().run_until_complete(_get_video())
+        if not source_path:
+            raise ValueError("Source video path not found")
+
         from app.services.editing.video_renderer import render_single_clip
 
         rendered = []
@@ -201,14 +216,18 @@ def render_viral_clips(video_id: str) -> dict:
                 continue
 
             try:
+                face_data = (clip.metadata_json or {}).get("face_tracking")
+                subtitle_data = (clip.metadata_json or {}).get("subtitles")
+
                 result = render_single_clip(
                     video_id=video_id,
                     clip_id=clip.id,
                     start_time=clip.start_time,
                     end_time=clip.end_time,
                     output_path=clip.output_path,
-                    face_data=(clip.metadata_json or {}).get("face_tracking"),
-                    subtitle_data=[],
+                    source_path=str(source_path),
+                    face_data=face_data,
+                    subtitle_data=subtitle_data,
                     mood=clip.mood or "neutral",
                 )
                 rendered.append({"clip_id": clip.id, "status": "rendered", **result})
@@ -218,6 +237,7 @@ def render_viral_clips(video_id: str) -> dict:
                     "status": "failed",
                     "error": str(clip_error),
                 })
+                print(f"Render ERROR for clip {clip.id}: {clip_error}")
 
         async def _save_render_results():
             async with async_session_factory() as session:

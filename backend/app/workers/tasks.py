@@ -20,10 +20,10 @@ def run_full_pipeline(self, video_id: str, youtube_url: str):
     """
     workflow = chain(
         download_video.s(video_id, youtube_url),
-        transcribe_audio.s(video_id),
-        analyze_virality.s(video_id),
-        edit_clips.s(video_id),
-        render_clips.s(video_id),
+        transcribe_audio.s(),
+        analyze_virality.s(),
+        edit_clips.s(),
+        render_clips.s(),
     )
 
     result = workflow.apply_async()
@@ -33,31 +33,36 @@ def run_full_pipeline(self, video_id: str, youtube_url: str):
 @celery_app.task(bind=True, name="download_video")
 def download_video(self, video_id: str, youtube_url: str):
     from app.services.ingestion.downloader import download_youtube_video
-    return download_youtube_video(video_id, youtube_url)
+    download_youtube_video(video_id, youtube_url)
+    return video_id
 
 
 @celery_app.task(bind=True, name="transcribe_audio")
 def transcribe_audio(self, video_id: str):
     from app.services.ingestion.transcriber import transcribe_with_whisper
-    return transcribe_with_whisper(video_id)
+    transcribe_with_whisper(video_id)
+    return video_id
 
 
 @celery_app.task(bind=True, name="analyze_virality")
 def analyze_virality(self, video_id: str):
     from app.services.analysis.viral_analyzer import analyze_viral_segments
-    return analyze_viral_segments(video_id)
+    analyze_viral_segments(video_id)
+    return video_id
 
 
 @celery_app.task(bind=True, name="edit_clips")
 def edit_clips(self, video_id: str):
     from app.services.editing.video_composer import edit_viral_clips
-    return edit_viral_clips(video_id)
+    edit_viral_clips(video_id)
+    return video_id
 
 
 @celery_app.task(bind=True, name="render_clips")
 def render_clips(self, video_id: str):
     from app.services.editing.video_composer import render_viral_clips
-    return render_viral_clips(video_id)
+    render_viral_clips(video_id)
+    return video_id
 
 
 @celery_app.task(bind=True, name="publish_clip_to_tiktok")
